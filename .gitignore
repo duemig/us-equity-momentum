@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+
+# Python build artifacts
+*.egg-info/
+build/
+dist/
+
+# Downloaded raw archives (parsed CSVs and metadata are kept)
+data/factors_downloaded/raw/
+
+# LaTeX build artifacts (report.pdf is kept)
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.bbl
+report/*.blg

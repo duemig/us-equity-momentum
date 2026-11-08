@@ -1,0 +1,19 @@
+{
+  "download_date": "2026-11-08",
+  "source": "Kenneth R. French Data Library",
+  "base_url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/",
+  "files": {
+    "ff_north_america_3factors": {
+      "zip": "North_America_3_Factors_CSV.zip",
+      "rows": 435,
+      "first_month": "1990-07",
+      "last_month": "2026-09"
+    },
+    "ff_north_america_mom": {
+      "zip": "North_America_Mom_Factor_CSV.zip",
+      "rows": 431,
+      "first_month": "1990-11",
+      "last_month": "2026-09"
+    }
+  }
+}
