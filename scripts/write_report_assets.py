@@ -257,6 +257,9 @@ Fama-French factor decomposition, and a short analytical proof, plus robustness 
 
 It started as an assignment for the Quantitative Portfolio Management course at Frankfurt School.
 
+The full write-up, with method, results, robustness, and references, is in
+[report/report.pdf](report/report.pdf).
+
 ## Main results
 
 - Momentum (top decile minus bottom decile, equal weighted) returned {macros["momMean"]} per
