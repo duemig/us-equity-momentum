@@ -72,7 +72,7 @@ def rolling_factor_model(
             "active_alpha": active_alpha,
             "annualised_alpha": (1.0 + active_alpha) ** MONTHS_PER_YEAR - 1.0,
         }
-        for name, beta in zip(columns, betas, strict=False):
+        for name, beta in zip(columns, betas, strict=True):
             record[f"beta_{name.removesuffix('_rf')}"] = float(beta)
         records[month] = record
     return pd.DataFrame.from_dict(records, orient="index").sort_index()

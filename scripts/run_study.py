@@ -144,8 +144,9 @@ def main() -> None:
     active = (iv - ew).dropna()
     write_series(pd.DataFrame({"iv": iv, "ew": ew, "active": active}), "portfolio_returns.csv")
 
-    metrics["iv_portfolio"] = stats.summary_stats(iv)
-    metrics["ew_benchmark"] = stats.summary_stats(ew)
+    risk_free = factor_series["rf"]
+    metrics["iv_portfolio"] = stats.summary_stats(iv, risk_free)
+    metrics["ew_benchmark"] = stats.summary_stats(ew, risk_free)
     metrics["active"] = stats.summary_stats(active)
     metrics["active_alpha_ff3"] = stats.factor_regression(active, factor_series, FF3)
 
@@ -256,13 +257,13 @@ def make_figures(
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(
         model.index.to_timestamp(),
-        model["factor_part"].to_numpy(),
+        model["systematic"].to_numpy(),
         label="Systematic",
         linewidth=1.0,
     )
     ax.plot(
         model.index.to_timestamp(),
-        model["active_alpha"].to_numpy(),
+        model["idiosyncratic"].to_numpy(),
         label="Idiosyncratic",
         linewidth=1.0,
     )

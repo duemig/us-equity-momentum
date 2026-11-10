@@ -39,11 +39,15 @@ def mean_t_statistics(returns: pd.Series, lags: int | None = None) -> dict[str, 
     }
 
 
-def summary_stats(returns: pd.Series) -> dict[str, float]:
+def summary_stats(returns: pd.Series, risk_free: pd.Series | None = None) -> dict[str, float]:
     """Summarise a monthly return series.
 
     Args:
         returns: Monthly return series indexed by month.
+        risk_free: (Optional) monthly risk-free rate. When given, the Sharpe ratio uses returns
+            in excess of it, the convention for a fully invested long-only portfolio. When
+            `None`, the Sharpe ratio uses the raw returns, appropriate for a self-financing
+            long-short. The other statistics always describe the raw return series.
 
     Returns:
         A mapping with the sample size, monthly and annualised mean and volatility, the
@@ -55,6 +59,16 @@ def summary_stats(returns: pd.Series) -> dict[str, float]:
     n = len(values)
     mean = float(values.mean())
     std = float(values.std(ddof=1))
+    if risk_free is None:
+        sharpe_returns = series
+    else:
+        sharpe_returns = (series - risk_free.reindex(series.index)).dropna()
+    sharpe_std = float(sharpe_returns.std(ddof=1))
+    sharpe = (
+        float(sharpe_returns.mean() / sharpe_std * np.sqrt(MONTHS_PER_YEAR))
+        if sharpe_std > 0
+        else float("nan")
+    )
     tstats = mean_t_statistics(series)
     return {
         "n_months": n,
@@ -62,7 +76,7 @@ def summary_stats(returns: pd.Series) -> dict[str, float]:
         "mean_annual": mean * MONTHS_PER_YEAR,
         "vol_monthly": std,
         "vol_annual": std * np.sqrt(MONTHS_PER_YEAR),
-        "sharpe_annual": (mean / std) * np.sqrt(MONTHS_PER_YEAR) if std > 0 else float("nan"),
+        "sharpe_annual": sharpe,
         "t_ols": tstats["t_ols"],
         "t_nw": tstats["t_nw"],
         "nw_lags": tstats["nw_lags"],
@@ -105,8 +119,8 @@ def factor_regression(
         cov_type="HAC", cov_kwds={"maxlags": used_lags}
     )
     names = ["alpha", *columns]
-    params = dict(zip(names, fit.params, strict=False))
-    tvalues = dict(zip(names, fit.tvalues, strict=False))
+    params = dict(zip(names, fit.params, strict=True))
+    tvalues = dict(zip(names, fit.tvalues, strict=True))
     return {
         "n_months": n,
         "nw_lags": used_lags,

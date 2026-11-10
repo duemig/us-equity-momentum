@@ -29,12 +29,12 @@
 \noindent
 This study rebuilds, from monthly prices of \nStocks{} US large-cap stocks between \sampleStart{}
 and \sampleEnd{}, a decile momentum strategy and an inverse-volatility portfolio measured against
-an equal-weight benchmark. Over this sample the momentum long-short lost \momMean{} per month and
+an equal-weight benchmark. Over this sample the momentum long-short returned \momMean{} per month and
 is not statistically distinguishable from zero. It carries a large loading on the published
 momentum factor yet a significant negative four-factor alpha, so a ten-percent breakpoint
 equal-weighted construction is a weaker version of the factor. The inverse-volatility portfolio
 tracked the equal-weight benchmark closely, with an active return that was small and
-insignificant. The results survive alternative formation windows, quintile sorting, and
+insignificant. The conclusion is robust to alternative formation windows, quintile sorting, and
 transaction costs.
 \end{abstract}
 
@@ -69,6 +69,12 @@ to \revHml{} percentage points on value, \revSmb{} on size, and \revMkt{} on the
 individual months, which reflects the routine revisions Kenneth French applies to the North
 American history; the risk-free rate is unchanged.
 
+The universe is fixed. The \nStocks{} stocks all have a complete price history over the sample, so
+they are survivors, and the long-only portfolio returns are likely biased upward relative to a
+universe that included delistings. The factor regressions and the volatility decomposition describe
+the realised returns in sample rather than forecasting them. With \nStocks{} names the deciles hold
+ten stocks each, which is why a quintile sort is reported alongside.
+
 \section{Method}
 
 \subsection{Momentum}
@@ -92,23 +98,29 @@ return is the inverse-volatility return minus the equal-weight return.
 The active return is regressed on the market, size, and value factors over a rolling twelve-month
 window by ordinary least squares with an intercept. The estimated betas are applied to the current
 month's factors to split the active return into a systematic part, $\alpha + \sum_k \beta_k f_{k,t}$,
-and an idiosyncratic residual. Statistical significance uses Newey-West standard errors
+and an idiosyncratic residual $\varepsilon$. The active alpha is the active return net of the factor
+contribution, $\alpha + \varepsilon$. Statistical significance uses Newey-West standard errors
 \citep{newey1987}.
 
 \subsection{A volatility contribution identity}
 
-Writing a portfolio return as a sum of components $r_i = a_i + \beta_{i,p} f_i + \varepsilon_i$ and
-using $\operatorname{cov}(X,Y) = \sigma(X)\,\sigma(Y)\,\operatorname{corr}(X,Y)$,
+For a return $r_p = \alpha + \sum_{k=1}^K \beta_k f_k + \varepsilon$ with constant $\alpha$, the
+total risk splits into a contribution from each factor plus an idiosyncratic term. Using
+$\sigma^2(r_p) = \operatorname{cov}(r_p, r_p)$, the linearity of covariance, and
+$\operatorname{cov}(X,Y) = \sigma(X)\,\sigma(Y)\,\operatorname{corr}(X,Y)$,
 \begin{align}
-\sigma^2(r_p) &= \operatorname{cov}\Big(r_p, \sum_{i=1}^N r_i\Big)
-             = \sigma(r_p) \, \sigma\Big(\sum_i r_i\Big) \operatorname{corr}\Big(r_p, \sum_i r_i\Big).
+\sigma^2(r_p)
+  &= \operatorname{cov}\Big(r_p,\ \alpha + \sum_{k=1}^K \beta_k f_k + \varepsilon\Big)
+   = \sum_{k=1}^K \beta_k \operatorname{cov}(r_p, f_k) + \operatorname{cov}(r_p, \varepsilon).
 \end{align}
-Dividing by $\sigma(r_p)$ and expanding each component, the constant terms have zero volatility and
-zero correlation with the portfolio, which leaves the contribution of each factor to portfolio
-volatility,
+Dividing by $\sigma(r_p)$ gives the volatility contributions,
 \begin{align}
-\sigma(r_p) &= \sum_{i=1}^N \beta_{i,p} \, \sigma(f_i) \, \operatorname{corr}(r_p, f_i).
+\sigma(r_p)
+  &= \sum_{k=1}^K \beta_k \, \sigma(f_k) \, \operatorname{corr}(r_p, f_k)
+   + \sigma(\varepsilon)\,\operatorname{corr}(r_p, \varepsilon).
 \end{align}
+The sum is the systematic contribution of the factors; the final term is the idiosyncratic
+contribution, which vanishes only when the residual is uncorrelated with the portfolio.
 
 \section{Results}
 
@@ -152,14 +164,15 @@ close to the equal-weight benchmark at \ewMean{} and \ewSharpe{} (Table~\ref{tab
 Figure~\ref{fig:ivew}). The active return was \activeMean{} per month with a Newey-West
 t-statistic of \activeTnw{}, so the two portfolios are hard to tell apart. The rolling betas of the
 active return move over time and average \betaMktMean{} on the market, \betaSmbMean{} on size, and
-\betaHmlMean{} on value (Figure~\ref{fig:betas}). On average \rollRsq{} of the variance of the
-active return is explained by the three factors, so a large part remains idiosyncratic
-(Figures~\ref{fig:alpha} and~\ref{fig:sysidio}).
+\betaHmlMean{} on value (Figure~\ref{fig:betas}). On average \rollRsq{} of the variance within each
+rolling window is explained by the three factors, so a large part of the active return is
+idiosyncratic (Figures~\ref{fig:alpha} and~\ref{fig:sysidio}).
 
 \begin{table}[htbp]
   \centering
   \caption{Portfolio statistics. Mean is per month, volatility is annualised, and the t-statistic
-  uses Newey-West standard errors.}
+  uses Newey-West standard errors. The Sharpe ratios of the long-only portfolios use returns in
+  excess of the one-month risk-free rate.}
   \label{tab:portfolio}
   \input{generated/table_portfolio.tex}
 \end{table}
@@ -245,9 +258,9 @@ equal weights each month.
 
 \paragraph{Replication.}
 The Python rebuild matches the original workbook to floating-point precision across returns,
-deciles, portfolios, and the rolling regression. One isolated error was found: in \momMinMonth's
-neighbour month a formation-return tie placed one stock twice in a middle decile and dropped
-another, which affected only that decile in that month and left the long-short unchanged. The
+deciles, portfolios, and the rolling regression. One isolated error was found: in February 2010 a
+formation-return tie placed one stock twice in a middle decile and dropped another, which affected
+only that decile in that month and left the long-short unchanged. The
 comparison is documented in the repository.
 
 \section{Conclusion}

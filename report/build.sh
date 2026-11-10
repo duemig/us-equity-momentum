@@ -6,7 +6,7 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
-python scripts/write_report_assets.py
+python3 scripts/write_report_assets.py
 
 cd report
 latexmk -pdf -interaction=nonstopmode -halt-on-error report.tex

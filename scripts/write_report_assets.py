@@ -153,7 +153,7 @@ def write_tables(metrics: dict) -> None:
                 label,
                 pct(spec["alpha_monthly"]),
                 num(spec["alpha_t"]),
-                num(betas.get("mkt_rf", float("nan"))) if "mkt_rf" in betas else "--",
+                num(betas["mkt_rf"]) if "mkt_rf" in betas else "--",
                 num(betas["smb"]) if "smb" in betas else "--",
                 num(betas["hml"]) if "hml" in betas else "--",
                 num(betas["wml"]) if "wml" in betas else "--",
@@ -231,6 +231,7 @@ def write_tables(metrics: dict) -> None:
 
 def write_readme(metrics: dict, macros: dict[str, str]) -> None:
     """Write the README with the main results drawn from the metrics."""
+    macros = {name: value.replace("\\%", "%") for name, value in macros.items()}
 
     def table_row(label: str, block: str) -> str:
         stats = metrics[block]
@@ -253,7 +254,8 @@ def write_readme(metrics: dict, macros: dict[str, str]) -> None:
 A faithful Python rebuild of a quantitative portfolio study on 100 US large-cap stocks,
 monthly from {macros["sampleStart"]} to {macros["sampleEnd"]}. It covers a decile momentum
 strategy, an inverse-volatility portfolio against an equal-weight benchmark with a rolling
-Fama-French factor decomposition, and a short analytical proof, plus robustness checks.
+Fama-French factor decomposition, and a short volatility-decomposition identity, plus
+robustness checks.
 
 It started as an assignment for the Quantitative Portfolio Management course at Frankfurt School.
 
@@ -280,12 +282,17 @@ The full write-up, with method, results, robustness, and references, is in
 
 {results_table}
 
+The universe is a fixed set of survivors, so the long-only returns are likely biased upward; the
+report covers this and the other caveats. Sharpe ratios for the long-only portfolios use returns in
+excess of the risk-free rate.
+
 ## How to run
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+pip install -e ".[dev]"
 
 python scripts/download_factors.py     # refresh Kenneth French factors (records the download date)
 python scripts/run_study.py            # write results/ and figures/

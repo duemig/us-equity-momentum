@@ -43,8 +43,8 @@ SOURCES = {
 MONTH_ROW = re.compile(r"^\s*(\d{6})\s*,(.*)$")
 
 
-def fetch_zip(zip_name: str) -> bytes:
-    """Download a zip file from the data library and return its single CSV as bytes."""
+def fetch_zip(zip_name: str) -> tuple[bytes, bytes]:
+    """Download a zip from the data library and return the raw zip and its single CSV as bytes."""
     url = BASE + zip_name
     request = urllib.request.Request(url, headers={"User-Agent": "factor-download-script"})
     with urllib.request.urlopen(request, timeout=120, context=SSL_CONTEXT) as response:  # noqa: S310
@@ -70,7 +70,7 @@ def parse_monthly(csv_bytes: bytes, columns: list[str]) -> list[dict]:
             continue
         month = match.group(1)
         record = {"date": f"{month[:4]}-{month[4:]}"}
-        pairs = zip(columns, values, strict=False)
+        pairs = zip(columns, values, strict=True)
         record.update({name: float(value) / 100.0 for name, value in pairs})
         rows.append(record)
     return rows
